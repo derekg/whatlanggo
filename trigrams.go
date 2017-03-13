@@ -10,6 +10,12 @@ type trigram struct {
 	count   int
 }
 
+type triSlice []trigram
+
+func (t triSlice) Less(i, j int) bool { return t[i].count < t[j].count }
+func (t triSlice) Len() int           { return len(t) }
+func (t triSlice) Swap(i, j int)      { t[j], t[i] = t[i], t[j] }
+
 //convert punctuations and digits to space.
 func toTrigramChar(ch rune) rune {
 	if isStopChar(ch) {
@@ -28,7 +34,7 @@ func getTrigramsWithPositions(text string) map[string]int {
 		i++
 	}
 
-	sort.SliceStable(trigrams, func(i, j int) bool { return trigrams[i].count < trigrams[j].count })
+	sort.Stable(triSlice(trigrams))
 
 	trigramsWithPositions := map[string]int{}
 

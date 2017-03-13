@@ -91,10 +91,6 @@ func detectLangBaseOnScript(text string, options Options, script *unicode.RangeT
 }
 func detectLangInProfiles(text string, options Options, langProfileList langProfileList) Lang {
 	trigrams := getTrigramsWithPositions(text)
-	type langDistance struct {
-		lang Lang
-		dist int
-	}
 	langDistances := []langDistance{}
 
 	for lang, langTrigrams := range langProfileList {
@@ -117,10 +113,22 @@ func detectLangInProfiles(text string, options Options, langProfileList langProf
 	if len(langDistances) == 0 {
 		return -1
 	}
-	sort.SliceStable(langDistances, func(i, j int) bool { return langDistances[i].dist < langDistances[j].dist })
+	sort.Stable(ld(langDistances))
+
+	//sort.SliceStable(langDistances, func(i, j int) bool { return langDistances[i].dist < langDistances[j].dist })
 
 	return langDistances[0].lang
 }
+
+type langDistance struct {
+	lang Lang
+	dist int
+}
+type ld []langDistance
+
+func (l ld) Less(i int, j int) bool { return l[i].dist < l[j].dist }
+func (l ld) Swap(i int, j int)      { l[j], l[i] = l[i], l[j] }
+func (l ld) Len() int               { return len(l) }
 
 func calculateDistance(langTrigrams []string, textTrigrams map[string]int) int {
 	var dist, totalDist int
